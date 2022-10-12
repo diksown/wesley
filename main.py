@@ -1,109 +1,162 @@
-# Esse programa recebe o mapa de uma cidade e faz o cálculo de uma rota no waze.
-# n, m
-# x1, y1, x2, y2
-# As proximas n linhas devem conter m inteiros, 
-# onde 0 denota um caminho livre e 1 denota um 
-# caminho ocupado (construções, etc)
-
-from math import sqrt
-import random
+import matplotlib.pyplot as plt
+import networkx as nx
 import sys
-from time import sleep
-from queue import PriorityQueue
 
-def mostra_mapa(mapa, visitado):
-    para_mostrar = ""
-    for i in range(len(mapa)):
-        for j in range(len(mapa[0])):
-            if visitado[i][j]:
-                para_mostrar += '▒'
-            elif mapa[i][j] == 0:
-                para_mostrar += ' '
-            else:
-                para_mostrar += '█'
-        para_mostrar += '\n'
+def readInput():
+    'Return a list of edges from the input file, [[node1, node2, weight, charge], ...]'
 
-    print(para_mostrar)
-    print('\n')
-    sleep(0.01)
+    edges= []
+    with open('input') as f:
+        for line in f:
+            edges.append(line.rstrip('\n').split(' '))
 
-def heuristica(x1, y1, x2, y2):
-    return random.random()
+    for edge in edges:
+        edge[0] = int(edge[0])
+        edge[1] = int(edge[1])
+        edge[2] = float(edge[2])
+        edge[3] = float(edge[3])
 
-def a_star(mapa, x1, y1, x2, y2):
-    visitado = [[False for i in range(len(mapa[0]))] for j in range(len(mapa))]
-    fila = PriorityQueue()
-    fila.put((0, (x1, y1)))
-    visitado[x1][y1] = True
-    while fila:
-        mostra_mapa(mapa, visitado)
-        custo, (x, y) = fila.get()
-        if x == x2 and y == y2:
-            return True
-        if x + 1 < len(mapa) and mapa[x + 1][y] == 0 and not visitado[x + 1][y]:
-            fila.put((custo + 1 + heuristica(x + 1, y, x2, y2), (x + 1, y)))
-            visitado[x + 1][y] = True
-        if x - 1 >= 0 and mapa[x - 1][y] == 0 and not visitado[x - 1][y]:
-            fila.put((custo + 1 + heuristica(x - 1, y, x2, y2), (x - 1, y)))
-            visitado[x - 1][y] = True
-        if y + 1 < len(mapa[0]) and mapa[x][y + 1] == 0 and not visitado[x][y + 1]:
-            fila.put((custo + 1 + heuristica(x, y + 1, x2, y2), (x, y + 1)))
-            visitado[x][y + 1] = True
-        if y - 1 >= 0 and mapa[x][y - 1] == 0 and not visitado[x][y - 1]:
-            fila.put((custo + 1 + heuristica(x, y - 1, x2, y2), (x, y - 1)))
-            visitado[x][y - 1] = True
+    return edges
 
+def graphSetup(edges):
+    G = nx.DiGraph()
+    for edge in edges:
+        G.add_edge(edge[0], edge[1], weight=edge[2], charge=edge[3])
 
-def dfs(mapa, x1, y1, x2, y2):
-    visitado = [[False for i in range(len(mapa[0]))] for j in range(len(mapa))]
-    pilha = []
-    pilha.append((x1, y1))
-    visitado[x1][y1] = True
-    while pilha:
-        mostra_mapa(mapa, visitado)
-        x, y = pilha.pop()
-        if x == x2 and y == y2:
-            return True
-        if x + 1 < len(mapa) and mapa[x + 1][y] == 0 and not visitado[x + 1][y]:
-            pilha.append((x + 1, y))
-            visitado[x + 1][y] = True
-        if x - 1 >= 0 and mapa[x - 1][y] == 0 and not visitado[x - 1][y]:
-            pilha.append((x - 1, y))
-            visitado[x - 1][y] = True
-        if y + 1 < len(mapa[0]) and mapa[x][y + 1] == 0 and not visitado[x][y + 1]:
-            pilha.append((x, y + 1))
-            visitado[x][y + 1] = True
-        if y - 1 >= 0 and mapa[x][y - 1] == 0 and not visitado[x][y - 1]:
-            pilha.append((x, y - 1))
-            visitado[x][y - 1] = True
-    return False
+    return G
+
+def drawGraph(G, pos):
+    # nodes
+    nx.draw_networkx_nodes(G, pos, node_size=400)
+
+    # edges
+    curvedEdges = [edge for edge in G.edges() if reversed(edge) in G.edges()]
+    straightEdges = list(set(G.edges()) - set(curvedEdges))
+
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=curvedEdges,
+        width=1,
+        edge_color="k",
+        style="solid",
+        arrows=True,
+        arrowstyle="-|>",
+        arrowsize=10,
+        connectionstyle='arc3, rad = 0.25'
+    )
+
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=straightEdges,
+        width=1,
+        edge_color="k",
+        style="solid",
+        arrows=True,
+        arrowstyle="-|>",
+        arrowsize=10
+    )
+
+    nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif") # node labels
+    edge_labels = nx.get_edge_attributes(G, "weight") # edge weight labels
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color="orange")
+
+    ax = plt.gca()
+    ax.margins(0.08)
+    plt.axis("off")
+    plt.tight_layout()
+    plt.show()
+
+    plt.savefig("network.png")
+
+def drawPath(G, pos, path):
+    'Draw the path in the graph'
+
+    pathEdges = []
+    for i in range(len(path) - 1):
+        pathEdges.append((path[i], path[i+1]))
+
+    curvedEdges = [edge for edge in G.edges() if reversed(edge) in G.edges()]
+    straightEdges = list(set(G.edges()) - set(curvedEdges))
+
+    curvedPathEdges = [edge for edge in pathEdges if edge in curvedEdges]
+    pathEdges = list(set(pathEdges) - set(curvedPathEdges))
+
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=curvedPathEdges,
+        width=1,
+        edge_color="r",
+        style="solid",
+        arrows=True,
+        arrowstyle="-|>",
+        arrowsize=10,
+        connectionstyle='arc3, rad = 0.25'
+    )
+
+    nx.draw_networkx_edges(
+        G,
+        pos,
+        edgelist=pathEdges,
+        width=1,
+        edge_color="r",
+        style="solid",
+        arrows=True,
+        arrowstyle="-|>",
+        arrowsize=10
+    )
+
+    # edge weight labels
+    edge_labels = nx.get_edge_attributes(G, "weight")
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color="orange")
+
+    plt.savefig("network-path.png")
+
+def getShortestPath(G, source, target):
+    'Return the shortest path from source to target using Dijkstra algorithm'
+    return nx.shortest_path(G, source, target, weight='weight')
+
+def getSimplestPath(G, source, target):
+    'Return the simplest path from source to target using DFS algorithm'
+    return nx.shortest_path(G, source, target, weight=None)
 
 def main():
     if len(sys.argv) != 2:
-        print("Uso: python3 main.py <algoritmo>")
-        print("Algoritmos disponíveis: dfs, a_star")
+        print("Uso: python3 main.py <rota>")
+        print("Rotas disponíveis: mais_simples, menor_rota, mais_rapida, mais_segura")
+        print("Mais simples: menor número de paradas (nós)")
+        print("Menor rota: menor distância percorrida")
+        print("Mais rápida: menor tempo de viagem")
+        print("Mais segura: evita regiões (nós) com maior índice de criminalidade")
         return
 
-    with open('input') as f:
-        mapa = []
-        for line in f:
-            mapa.append(list(map(int, list(line.strip()))))
+    op = sys.argv[1]
+    edges = readInput()
+    G = graphSetup(edges)
 
-    n = len(mapa)
-    m = len(mapa[0])
-    x1, y1, x2, y2 = 0, 0, n - 1, m - 1
-    tipo = sys.argv[1]
+    pos = nx.spring_layout(G, seed=None)  # positions for all nodes - seed for reproducibility
 
-    if tipo == "dfs":
-        # DFS
-        dfs(mapa, x1, y1, x2, y2)
-    elif tipo == "a_star":
+    drawGraph(G, pos)
+
+    if op == 'mais_simples': # dfs
+        path = getSimplestPath(G, 1, 7)
+        print(path)
+        drawPath(G, pos, path)
+    elif op == 'menor_rota': # dijkstra
+        path = getShortestPath(G, 1, 7)
+        print(path)
+        drawPath(G, pos, path)
+    elif op == 'mais_rapida':
         # A*
-        a_star(mapa, x1, y1, x2, y2)
-    else: 
-        print("Algoritmo inválido. Algoritmos disponíveis: dfs, a_star")
+        pass
+    elif op == 'mais_segura':
+        # A*
+        pass
+    else:
+        print("Rota inválida. Rotas disponíveis: mais_simples, menor_rota, mais_rapida, mais_segura")
         return
-
 
 if __name__ == "__main__":
     main()
