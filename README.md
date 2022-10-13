@@ -2,12 +2,16 @@
 
 Trabalho 1 de Inteligência Artificial - SCC 0230
 
-Dikson Santos - 11275147
-Débora Buzon -
-Vinicius -
-Cadavez -
-João Pedro Rodrigues Freitas - 11316552
-Beatriz - 
+## Membros
+
+| Nome | Número USP |
+| ------ | ------ |
+|Dikson Santos | 11275147 |
+|Débora Buzon | |
+|Vinicius | |
+|Cadavez | |
+|João Pedro Rodrigues Freitas | 11316552 |
+|Beatriz | | 
 
 ## Como executar
 
@@ -20,6 +24,13 @@ python3 main.py
 ```
 
 ## Input file
+
 ```
-A B P C -> Aresta de A para B com peso P e carga C
+A B P TP I -> Aresta de A para B com peso P, tipo de problema TP e influência I
+```
+```
+TP:
+0 - Situação normal
+1 - Trânsito
+2 - Criminalidade
 ```

@@ -78,7 +78,6 @@ def drawPath(G, pos, path):
         pathEdges.append((path[i], path[i+1]))
 
     curvedEdges = [edge for edge in G.edges() if reversed(edge) in G.edges()]
-    straightEdges = list(set(G.edges()) - set(curvedEdges))
 
     curvedPathEdges = [edge for edge in pathEdges if edge in curvedEdges]
     pathEdges = list(set(pathEdges) - set(curvedPathEdges))
