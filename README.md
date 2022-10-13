@@ -26,7 +26,7 @@ python3 main.py
 ## Input file
 
 ```
-A B P TP I -> Aresta de A para B com peso P, tipo de problema TP e influência I
+A B P TP I -> Aresta de A para B com peso P, tipo de problema TP e impacto I
 ```
 ```
 TP:
