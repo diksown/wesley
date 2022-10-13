@@ -119,7 +119,7 @@ def getShortestPath(G, source, target):
     return nx.shortest_path(G, source, target, weight='weight')
 
 def getSimplestPath(G, source, target):
-    'Return the simplest path from source to target using DFS algorithm'
+    'Return the simplest path from source to target using BFS algorithm'
     return nx.shortest_path(G, source, target, weight=None)
 
 def main():
@@ -140,7 +140,7 @@ def main():
 
     drawGraph(G, pos)
 
-    if op == 'mais_simples': # dfs
+    if op == 'mais_simples': # bfs
         path = getSimplestPath(G, 1, 7)
         print(path)
         drawPath(G, pos, path)
