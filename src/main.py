@@ -11,8 +11,8 @@ def main():
         return
 
     op = sys.argv[1]
-    graph = Graph()
 
+    graph = Graph()
     graph.drawGraph()
 
     if op == 'mais_simples': # bfs
@@ -20,11 +20,11 @@ def main():
         print(path)
         graph.drawPath(path)
     elif op == 'menor_rota': # dijkstra
-        path = graph.getShortestPath(1, 7)
+        path = graph.getShortestPath(10, 8)
         print(path)
         graph.drawPath(path)
     elif op == 'mais_rapida': # A*
-        path = graph.getFastestPath(1, 7)
+        path = graph.astar_path(10, 8)
         print(path)
         graph.drawPath(path)
     else:
