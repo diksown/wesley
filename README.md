@@ -7,17 +7,17 @@ Trabalho 1 de Inteligência Artificial - SCC 0230
 | Nome | Número USP |
 | ------ | ------ |
 |Dikson Santos | 11275147 |
-|Débora Buzon | |
-|Vinicius | |
-|Cadavez | |
+|Débora Buzon | 10851687 |
+|Vinicius Monteiro | 11932463 |
+|Felipe Cadavez | 11208558 |
 |João Pedro Rodrigues Freitas | 11316552 |
-|Beatriz | | 
+|Beatriz Diniz | 11925430 | 
 
 ## Como executar
 
 ```
 git clone https://github.com/diksown/wesley
-cd wesley
+cd wesley/src
 pip3 install matplotlib
 pip3 install networkx
 python3 main.py
@@ -26,11 +26,11 @@ python3 main.py
 ## Input file
 
 ```
-A B P TP I -> Aresta de A para B com peso P, tipo de problema TP e impacto I
+Para cada linha:
+A B P S I -> Aresta de A para B com peso P, situação S e intensidade de trânsito I
 ```
 ```
-TP:
+S:
 0 - Situação normal
-1 - Trânsito
-2 - Criminalidade
+1 - Trânsito na rota
 ```

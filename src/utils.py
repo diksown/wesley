@@ -1,4 +1,6 @@
 def readInput():
+    'Reads input from stdin and returns a list of edges'
+    
     edges= []
     with open('input') as f:
         for line in f:

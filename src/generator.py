@@ -4,6 +4,7 @@ TESTE = 10
 QTD = 20
 
 def main():
+    'Generate a random graph'
     rotas = []
     for i in range(QTD):
         src = random.randint(1, TESTE)

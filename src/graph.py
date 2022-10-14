@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 from utils import *
-
 from heapq import heappop, heappush
 from itertools import count
 from networkx.algorithms.shortest_paths.weighted import _weight_function
 
 G = nx.DiGraph()
+TRAFFIC_JAM_FACTOR = 5 # Multiplicidade do impacto do trânsito na rota
 
 class Graph():
     def __init__(self):
@@ -17,6 +17,37 @@ class Graph():
         
         self.pos = nx.spring_layout(G)
 
+    def getNodes(self):
+        return G.nodes()
+
+    def drawEdgeList(self, edgeList, color, style, curved):
+        if (curved):
+            nx.draw_networkx_edges(
+                G,
+                self.pos,
+                edgelist=edgeList,
+                width=1,
+                edge_color=color,
+                style=style,
+                arrows=True,
+                arrowstyle="-|>",
+                arrowsize=10,
+                connectionstyle='arc3, rad = 0.25'
+            )
+            return
+
+        nx.draw_networkx_edges(
+            G,
+            self.pos,
+            edgelist=edgeList,
+            width=1,
+            edge_color=color,
+            style=style,
+            arrows=True,
+            arrowstyle="-|>",
+            arrowsize=10
+        )
+
     def drawGraph(self):
         # nodes
         nx.draw_networkx_nodes(G, self.pos, node_size=400)
@@ -26,59 +57,13 @@ class Graph():
         straightEdges = list(set(G.edges()) - set(curvedEdges))
         trafficCurvedEdges = [edge for edge in curvedEdges if G.edges[edge]['problem'] == 1]
         trafficStraightEdges = [edge for edge in straightEdges if G.edges[edge]['problem'] == 1]
-
         curvedEdges = list(set(curvedEdges) - set(trafficCurvedEdges))
         straightEdges = list(set(straightEdges) - set(trafficStraightEdges))
 
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=curvedEdges,
-            width=1,
-            edge_color="k",
-            style="solid",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10,
-            connectionstyle='arc3, rad = 0.25'
-        )
-
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=straightEdges,
-            width=1,
-            edge_color="k",
-            style="solid",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10
-        )
-
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=trafficCurvedEdges,
-            width=1,
-            edge_color="k",
-            style="dashed",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10,
-            connectionstyle='arc3, rad = 0.25'
-        )
-
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=trafficStraightEdges,
-            width=1,
-            edge_color="k",
-            style="dashed",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10
-        )
+        self.drawEdgeList(curvedEdges, "k", "solid", True)
+        self.drawEdgeList(straightEdges, "k", "solid", False)
+        self.drawEdgeList(trafficCurvedEdges, "k", "dashed", True)
+        self.drawEdgeList(trafficStraightEdges, "k", "dashed", False)
 
         nx.draw_networkx_labels(G, self.pos, font_size=12, font_family="sans-serif") # node labels
         edge_labels = nx.get_edge_attributes(G, "weight") # edge weight labels
@@ -97,35 +82,13 @@ class Graph():
         for i in range(len(path) - 1):
             pathEdges.append((path[i], path[i+1]))
 
+        # edges
         curvedEdges = [edge for edge in G.edges() if reversed(edge) in G.edges()]
-
         curvedPathEdges = [edge for edge in pathEdges if edge in curvedEdges]
         pathEdges = list(set(pathEdges) - set(curvedPathEdges))
 
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=curvedPathEdges,
-            width=1,
-            edge_color="r",
-            style="solid",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10,
-            connectionstyle='arc3, rad = 0.25'
-        )
-
-        nx.draw_networkx_edges(
-            G,
-            self.pos,
-            edgelist=pathEdges,
-            width=1,
-            edge_color="r",
-            style="solid",
-            arrows=True,
-            arrowstyle="-|>",
-            arrowsize=10
-        )
+        self.drawEdgeList(curvedPathEdges, "r", "solid", True)
+        self.drawEdgeList(pathEdges, "r", "solid", False)
 
         # edge weight labels
         edge_labels = nx.get_edge_attributes(G, "weight")
@@ -201,8 +164,7 @@ class Graph():
                     if qcost <= ncost:
                         continue
                 else:
-                    h = 5 * G.get_edge_data(curnode, neighbor)['impact']
-                print(curnode, neighbor, h, ncost, ncost + h, dist)
+                    h = TRAFFIC_JAM_FACTOR * G.get_edge_data(curnode, neighbor)['impact']
                 enqueued[neighbor] = ncost, h
                 push(queue, (ncost + h, next(c), neighbor, ncost + h, curnode))
 

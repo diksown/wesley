@@ -1,6 +1,9 @@
 import sys
 from graph import *
 
+SOURCE = 10 
+TARGET = 8
+
 def main():
     if len(sys.argv) != 2:
         print("Uso: python3 main.py <rota>")
@@ -15,21 +18,25 @@ def main():
     graph = Graph()
     graph.drawGraph()
 
-    if op == 'mais_simples': # bfs
-        path = graph.getSimplestPath(1, 7)
+    try:
+        if op == 'mais_simples': # bfs
+            path = graph.getSimplestPath(SOURCE, TARGET)
+        elif op == 'menor_rota': # dijkstra
+            path = graph.getShortestPath(SOURCE, TARGET)
+        elif op == 'mais_rapida': # A*
+            path = graph.astar_path(SOURCE, TARGET)
+        else:
+            print("Rota inválida. Rotas disponíveis: mais_simples, menor_rota, mais_rapida")
+            return
+
         print(path)
         graph.drawPath(path)
-    elif op == 'menor_rota': # dijkstra
-        path = graph.getShortestPath(10, 8)
-        print(path)
-        graph.drawPath(path)
-    elif op == 'mais_rapida': # A*
-        path = graph.astar_path(10, 8)
-        print(path)
-        graph.drawPath(path)
-    else:
-        print("Rota inválida. Rotas disponíveis: mais_simples, menor_rota, mais_rapida")
-        return
+        
+    except nx.NetworkXNoPath:
+        print("Não há caminho entre os nós {} e {} no grafo".format(SOURCE, TARGET))
+        
+    except nx.NodeNotFound:
+        print("Nó {} ou {} não existe no grafo".format(SOURCE, TARGET))
 
 if __name__ == "__main__":
     main()
