@@ -1,3 +1,11 @@
+##################################################
+# OBS: A cada execução, o posicionamento dos
+# nós utiliza uma seed que optamos por deixá-la
+# aleatória, portanto, caso a imagem gerada não
+# esteja de acordo com o esperado, basta executar
+# novamente o programa.
+##################################################
+
 import sys
 from graph import *
 
