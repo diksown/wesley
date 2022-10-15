@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 from utils import *
-from heapq import heappop, heappush
-from itertools import count
-from networkx.algorithms.shortest_paths.weighted import _weight_function
 
 from queue import PriorityQueue
+import random
 
 G = nx.DiGraph()
 TRAFFIC_JAM_FACTOR = 5 # Multiplicidade do impacto do trânsito na rota
@@ -16,8 +14,12 @@ class Graph():
 
         for edge in edges:
             G.add_edge(edge[0], edge[1], weight=edge[2], intensity=edge[3])
-        
-        self.pos = nx.spring_layout(G)
+
+        # seed = random.randint(0, 1000000)
+        seed = 432279
+        # print(seed)
+
+        self.pos = nx.spring_layout(G, seed=seed)
 
     def getNodes(self):
         return G.nodes()
@@ -106,85 +108,15 @@ class Graph():
         'Return the simplest path from source to target using BFS algorithm'
         return nx.shortest_path(G, source, target, weight=None)
 
-    # def astar_path(self, source, target, weight="weight"):
-    #     if source not in G or target not in G:
-    #         msg = f"Either source {source} or target {target} is not in G"
-    #         raise nx.NodeNotFound(msg)
-
-    #     push = heappush
-    #     pop = heappop
-    #     weight = _weight_function(G, weight)
-
-    #     # The queue stores priority, node, cost to reach, and parent.
-    #     # Uses Python heapq to keep in priority order.
-    #     # Add a counter to the queue to prevent the underlying heap from
-    #     # attempting to compare the nodes themselves. The hash breaks ties in the
-    #     # priority and is guaranteed unique for all nodes in the graph.
-    #     c = count()
-    #     queue = [(0, next(c), source, 0, None)]
-
-    #     # Maps enqueued nodes to distance of discovered paths and the
-    #     # computed heuristics to target. We avoid computing the heuristics
-    #     # more than once and inserting the node into the queue too many times.
-    #     enqueued = {}
-    #     # Maps explored nodes to parent closest to the source.
-    #     explored = {}
-
-    #     while queue:
-    #         # Pop the smallest item from queue.
-    #         _, __, curnode, dist, parent = pop(queue)
-
-    #         if curnode == target:
-    #             path = [curnode]
-    #             node = parent
-    #             while node is not None:
-    #                 path.append(node)
-    #                 node = explored[node]
-    #             path.reverse()
-    #             return path
-
-    #         if curnode in explored:
-    #             # Do not override the parent of starting node
-    #             if explored[curnode] is None:
-    #                 continue
-
-    #             # Skip bad paths that were enqueued before finding a better one
-    #             qcost, h = enqueued[curnode]
-    #             if qcost < dist:
-    #                 continue
-
-    #         explored[curnode] = parent
-    #         for neighbor, w in G[curnode].items():
-    #             ncost = dist + weight(curnode, neighbor, w)
-    #             if neighbor in enqueued:
-    #                 qcost, h = enqueued[neighbor]
-    #                 # print(neighbor, enqueued[neighbor])
-    #                 # print(curnode, neighbor, qcost, ncost, h)
-
-    #                 # if qcost <= ncost, a less costly path from the
-    #                 # neighbor to the source was already determined.
-    #                 # Therefore, we won't attempt to push this neighbor
-    #                 # to the queue
-    #                 if qcost <= ncost:
-    #                     continue
-
-    #             else:
-    #                 h = TRAFFIC_JAM_FACTOR * G.get_edge_data(curnode, neighbor)['intensity']
-
-    #             enqueued[neighbor] = ncost, h
-    #             print(neighbor, enqueued[neighbor])
-    #             push(queue, (ncost + h, next(c), neighbor, ncost, curnode))
-
-    #     raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
-
     def aStar(self, source, target):
         if source not in G or target not in G:
             msg = f"Either source {source} or target {target} is not in G"
             raise nx.NodeNotFound(msg)
-        
+
         OPEN = PriorityQueue()
         CLOSED = {}
-
+        
+        # (priority, node, cost, parent)
         OPEN.put((0, source, 0, None))
 
         while not OPEN.empty():
@@ -195,26 +127,29 @@ class Graph():
                 node = parent
                 while node is not None:
                     path.append(node)
-                    print(CLOSED[node])
                     node = CLOSED[node][1]
                 path.reverse()
                 return path
 
             CLOSED[curnode] = (dist, parent)
 
-            for neighbor, w in G[curnode].items():
-                cost = dist + G.get_edge_data(curnode, neighbor)['weight']
+            for neighbor, info in G[curnode].items():
+                cost = dist + info['weight']
+                heuristic = TRAFFIC_JAM_FACTOR * info['intensity']
+                newCost = cost + heuristic
+
+                if any(neighbor == node[1] and newCost < node[2] for node in OPEN.queue):
+                    OPEN.queue = [node for node in OPEN.queue if node[1] != neighbor]
+                    # OPEN.put((cost, neighbor, cost, curnode))
 
                 if neighbor in CLOSED:
-                    if CLOSED[neighbor][0] <= cost:
+                    if CLOSED[neighbor][0] < newCost:
                         continue
                     else:
                         CLOSED.pop(neighbor)
 
                 if neighbor not in OPEN.queue and neighbor not in CLOSED:
-                    h = TRAFFIC_JAM_FACTOR * G.get_edge_data(curnode, neighbor)['intensity']
-                    OPEN.put((cost + h, neighbor, cost + h, curnode))
-                    CLOSED[neighbor] = (cost + h, curnode)
+                    OPEN.put((newCost, neighbor, newCost, curnode))
+                    CLOSED[neighbor] = (newCost, curnode)
 
         raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
-

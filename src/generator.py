@@ -11,7 +11,7 @@ def main():
         dest = random.randint(1, TESTE)
         while src == dest or (src, dest) in rotas:
             dest = random.randint(1, TESTE)
-        print(f'{src} {dest} {random.randint(1, TESTE)} {random.randint(0, 1)} {random.randint(0, TESTE)}')
+        print(f'{src} {dest} {random.randint(1, TESTE)} {random.randint(0, TESTE)}')
         rotas.append((src, dest))
 
 if __name__ == '__main__':
