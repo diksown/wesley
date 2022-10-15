@@ -102,11 +102,21 @@ class Graph():
     
     def getShortestPath(self, source, target):
         'Return the shortest path from source to target using Dijkstra algorithm'
-        return nx.shortest_path(G, source, target, weight='weight')
+        path = nx.shortest_path(G, source, target, weight='weight')
+        totalCost = nx.path_weight(G, path, weight='weight')
+
+        print(f"Custo total: {totalCost}")
+
+        return path
 
     def getSimplestPath(self, source, target):
         'Return the simplest path from source to target using BFS algorithm'
-        return nx.shortest_path(G, source, target, weight=None)
+        path = nx.shortest_path(G, source, target, weight=None)
+        totalCost = nx.path_weight(G, path, weight='weight')
+
+        print(f"Custo total: {totalCost}")
+
+        return path
 
     def aStar(self, source, target):
         if source not in G or target not in G:
@@ -125,6 +135,7 @@ class Graph():
             if curnode == target:
                 path = [curnode]
                 node = parent
+                print(f"Custo total: {CLOSED[curnode][0]}")
                 while node is not None:
                     path.append(node)
                     node = CLOSED[node][1]
