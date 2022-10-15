@@ -9,8 +9,8 @@
 import sys
 from graph import *
 
-SOURCE = 10 
-TARGET = 8
+SOURCE = 8
+TARGET = 3
 
 def main():
     if len(sys.argv) != 2:
@@ -32,7 +32,8 @@ def main():
         elif op == 'menor_rota': # dijkstra
             path = graph.getShortestPath(SOURCE, TARGET)
         elif op == 'mais_rapida': # A*
-            path = graph.astar_path(SOURCE, TARGET)
+            # path = graph.astar_path(SOURCE, TARGET)
+            path = graph.aStar(SOURCE, TARGET)
         else:
             print("Rota inválida. Rotas disponíveis: mais_simples, menor_rota, mais_rapida")
             return

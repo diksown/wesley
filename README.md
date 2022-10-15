@@ -27,10 +27,5 @@ python3 main.py
 
 ```
 Para cada linha:
-A B P S I -> Aresta de A para B com peso P, situação S e intensidade de trânsito I
-```
-```
-S:
-0 - Situação normal
-1 - Trânsito na rota
+A B P I -> Aresta de A para B com peso P e intensidade de trânsito I
 ```

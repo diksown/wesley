@@ -10,7 +10,6 @@ def readInput():
         edge[0] = int(edge[0])
         edge[1] = int(edge[1])
         edge[2] = float(edge[2])
-        edge[3] = int(edge[3])
-        edge[4] = float(edge[4])
+        edge[3] = float(edge[3])
 
     return edges
