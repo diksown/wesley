@@ -22,6 +22,11 @@ pip3 install matplotlib
 pip3 install networkx
 python3 main.py
 ```
+```
+Os casos teste estão em src/testes.
+Basta copiar o conteúdo do arquivo para o arquivo input (removendo as linhas com *)
+Ainda, é necessário alterar em main.py as variáveis SOURCE e TARGET para os valores desejados.
+```
 
 ## Input file
 

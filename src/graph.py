@@ -15,9 +15,9 @@ class Graph():
         for edge in edges:
             G.add_edge(edge[0], edge[1], weight=edge[2], intensity=edge[3])
 
-        # seed = random.randint(0, 1000000)
-        seed = 432279
-        # print(seed)
+        seed = random.randint(0, 1000000)
+        # seed = 432279
+        print(seed)
 
         self.pos = nx.spring_layout(G, seed=seed)
 
